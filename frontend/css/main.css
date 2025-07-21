@@ -1,0 +1,19 @@
+body {
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.main-container {
+  max-width: 1000px;
+  margin: 0px auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+#status {
+  display: inline;
+}

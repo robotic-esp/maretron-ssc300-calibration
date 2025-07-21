@@ -1,0 +1,16 @@
+{
+  "name": "maretron_ssc300_calibration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@canboat/canboatjs": "file:../../canboatjs_fork",
+    "express": "^5.1.0"
+  }
+}

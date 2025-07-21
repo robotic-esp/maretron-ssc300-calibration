@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC300</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="./css/main.css" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Maretron SSC300 Calibration</h1>
+        <p>
+            This tool allows for the SSC300 compass to be calibrated. To calibrate the heading, click "Start Calibration"
+            under the Heading Calibration section. To set the installation offset, enter the current device heading in degrees
+            to one decimal place (e.g, 121.7°) and click "Start Calibration."
+            <br>
+            <i>
+                Note: For this tool to work, the NMEA 2000 network containing the SSC300 must be connected with
+                the Actisense NGX-1 (or NGT-1) bridge.</i>
+            <br>
+            <i> Note: the SSC300 must already be installed in the desired location before calibration is performed.
+                Calibration requires making 3 complete turns, so your boat must be in the water and in a clear area
+                to perform the calibration.
+            </i> 
+        </p>
+        <h2>🧭 Heading Calibration</h2>
+        <b>Status:</b>
+        <div id="status">
+        </div>
+        <br>
+        <button id="start-calibration" onclick="calibrate()">Start calibration</button>
+        <h2>🔒 Device Offset Calibration</h2>
+        <label for="heading">Heading (°): </label>
+        <input name="heading" placeholder="0.00°" id="heading" type="number" min="0" step=0.1 max="359">
+        <br>
+        <button id="set-installation-offset" onclick="setInstallationOffset()">Set installation offset</button>
+    </div>
+    <script src="./js/main.js"></script>
+</body>
+</html>
