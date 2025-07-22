@@ -1,8 +1,13 @@
 async function updateStatus() {
-  const statusJson = await fetch('/status');
-  const status = (await statusJson.json()).status;
+  const updateJson = await fetch('/status');
+  const update = (await updateJson.json());
+  console.log(update);
+  const heading = update.heading;
+  const status = update.status;
   const statusDiv = document.getElementById('status');
+  const headingDiv = document.getElementById('heading-reading');
   statusDiv.innerText = status;
+  headingDiv.innerText = `Current heading: ${Math.round(heading * 100)/100}°`;
 }
 
 async function calibrate() {

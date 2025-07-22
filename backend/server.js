@@ -28,15 +28,23 @@ const actisense = new serial({
   disableSetTransmitPGNs: true
 });
 
+
+const outputReady = new Promise(resolve => {
+  actisenseEmit.on('nmea2000OutAvailable', () => {
+    console.log('resolved')
+    resolve();
+  });
+});
+
+
 let latestCalibrationStatus = 'Not started';
-function initiateReset() {
+async function initiateReset() {
   const msgStr = '01 00 ef 01 f8 04 01 89 98 02 7e 0a 03 01 00 f0'.replaceAll(' ', '');
   const msg = toActisenseSerialFormat(126208, Buffer.from(msgStr, 'hex'), 96, 1, 7);
-  actisenseEmit.on('nmea2000OutAvailable', () => {
-    actisenseEmit.emit('nmea2000out', msg);
-  });
+  await outputReady;
+  actisenseEmit.emit('nmea2000out', msg);
   actisense.on('data', data => {
-    if (data.split(',')[2] === 126720) {
+    if (Number(data.split(',')[2]) === 126720) {
       const parsed = parser.parseString(data);
       latestCalibrationStatus = parsed.fields.status;
     }
@@ -44,24 +52,24 @@ function initiateReset() {
 }
 
 let latestHeading = 0;
-function setInstallationOffset(heading) {
+actisense.on('data', data => {
+  if (Number(data.split(',')[2]) === 127250) {
+    const parsed = parser.parseString(data);
+    latestHeading = Math.round(parsed.fields.heading * (180/Math.PI) * 1000) / 1000;
+  }
+});
+
+async function setInstallationOffset(heading) {
   let headingBytes = Math.floor(heading * 10).toString(16).padStart(4, '0');
   const headingBytesReversed = `${headingBytes[2]}${headingBytes[3]}${headingBytes[0]}${headingBytes[1]}`;
   const msgStr = `01 00 ef 01 f8 04 01 89 98 02 7e 0a 03 01 00 24 ${headingBytesReversed}`.replaceAll(' ', '');
   const msg = toActisenseSerialFormat(126208, Buffer.from(msgStr, 'hex'), 96, 1, 7);
-  actisenseEmit.on('nmea2000OutAvailable', () => {
-    actisenseEmit.emit('nmea2000out', msg);
-  });
-  actisense.on('data', data => {
-    if (data.split(',')[2] == 127250) {
-      const parsed = parser.parseString(data);
-      latestHeading = parsed.fields.heading * (180/Math.PI);
-    }
-  });
+  await outputReady;
+  actisenseEmit.emit('nmea2000out', msg);
 }
 
 app.get('/status', (req, res) => {
-  res.json({status: latestCalibrationStatus});
+  res.json({status: latestCalibrationStatus, heading: latestHeading});
 });
 
 app.get('/heading', (req, res) => {

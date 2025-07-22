@@ -17,3 +17,10 @@ body {
 #status {
   display: inline;
 }
+
+#heading-reading {
+  text-align: center;
+  background: lightblue;
+  width: 200px;
+  margin: 0px auto;
+}
