@@ -18,7 +18,11 @@ body {
   display: inline;
 }
 
-#heading-reading {
+#compass-info {
+  margin-top: 10px;
+}
+
+.info-block {
   text-align: center;
   background: lightblue;
   width: 200px;

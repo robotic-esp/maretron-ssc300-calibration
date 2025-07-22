@@ -1,6 +1,6 @@
 const path = require('node:path');
 const { EventEmitter } = require('node:events');
-const { serial, FromPgn, toActisenseSerialFormat } = require('@canboat/canboatjs');
+const { serial, FromPgn, toActisenseSerialFormat, pgnToActisenseSerialFormat, toPgn } = require('@canboat/canboatjs');
 
 const express = require('express');
 const app = express();
@@ -31,11 +31,36 @@ const actisense = new serial({
 
 const outputReady = new Promise(resolve => {
   actisenseEmit.on('nmea2000OutAvailable', () => {
-    console.log('resolved')
     resolve();
   });
 });
 
+let deviceInfo = false;
+async function requestDeviceInfo() {
+  let msg = toPgn({
+    pgn: 59904,
+    fields: {
+      pgn: 126996
+    }
+  });
+  msg = toActisenseSerialFormat(59904, msg, 255, 1, 6);
+  await outputReady;
+  actisenseEmit.emit('nmea2000out', msg);
+  actisense.on('data', function requestDeviceInfoDataHandler(data) {
+    if (Number(data.split(',')[2]) === 126996) {
+      const parsed = parser.parseString(data);
+      if (parsed.fields.modelId === 'SSC300') {
+        deviceInfo = {
+          productCode: parsed.fields.productCode,
+          softwareVersionCode: parsed.fields.softwareVersionCode,
+          modelVersion: parsed.fields.modelVersion,
+          modelSerialCode: parsed.fields.modelSerialCode
+        };
+        actisenseEmit.off('nmea2000out', requestDeviceInfoDataHandler);
+      }
+    }
+  });
+}
 
 let latestCalibrationStatus = 'Not started';
 async function initiateReset() {
@@ -69,7 +94,7 @@ async function setInstallationOffset(heading) {
 }
 
 app.get('/status', (req, res) => {
-  res.json({status: latestCalibrationStatus, heading: latestHeading});
+  res.json({status: latestCalibrationStatus, heading: latestHeading, deviceInfo});
 });
 
 app.get('/heading', (req, res) => {
@@ -104,5 +129,7 @@ app.post('/set-offset', (req, res) => {
   setInstallationOffset(heading);
   res.status(200).send();
 });
+
+requestDeviceInfo();
 
 app.listen(8080);

@@ -1,13 +1,25 @@
+let gotDeviceInfo = false;
 async function updateStatus() {
   const updateJson = await fetch('/status');
   const update = (await updateJson.json());
   console.log(update);
   const heading = update.heading;
   const status = update.status;
+  const deviceInfo = update.deviceInfo;
   const statusDiv = document.getElementById('status');
   const headingDiv = document.getElementById('heading-reading');
+  const deviceInfoDiv = document.getElementById('compass-info');
   statusDiv.innerText = status;
   headingDiv.innerText = `Current heading: ${Math.round(heading * 100)/100}°`;
+  if (deviceInfo && !gotDeviceInfo) {
+    deviceInfoDiv.innerText = `SSC300 Detected!
+Product code: ${deviceInfo.productCode}
+Software version: ${deviceInfo.softwareVersionCode}
+Model version: ${deviceInfo.modelVersion}
+Serial number: ${deviceInfo.modelSerialCode}
+`;
+    gotDeviceInfo = true;
+  }
 }
 
 async function calibrate() {
